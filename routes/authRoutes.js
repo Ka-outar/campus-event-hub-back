@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-// Quand le Frontend envoie une requête POST sur /api/auth/register, on appelle la fonction register
+// Route pour l'inscription (Register)
 router.post('/register', authController.register);
+
+// Route pour la connexion (Sign In) - LA LIGNE À RAJOUTER :
+router.post('/login', authController.login);
 
 module.exports = router;
