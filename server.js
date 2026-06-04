@@ -7,7 +7,8 @@ const db = require('./db');
 
 // 2. On ajoute l'importation de tes nouvelles routes ici :
 const authRoutes = require('./routes/authRoutes');
-
+const eventRoutes = require('./routes/eventRoutes');
+const registrationRoutes = require('./routes/registrationRoutes');
 const app = express();
 
 // Middleware
@@ -16,6 +17,9 @@ app.use(express.json());
 
 // 3. On dit à l'application d'utiliser tes routes d'authentification :
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+
+app.use('/api/registrations', registrationRoutes);
 
 // Route Test
 app.get('/api/test', (req, res) => {
