@@ -1,6 +1,8 @@
 const db = require('../db'); 
 
 // 1. تسجيل الطالب في حدث
+// 1. تسجيل الطالب في حدث (مع تنقيص مقعد واحد)
+// 1. تسجيل الطالب في حدث (منع التكرار + تنقيص مقعد)
 exports.registerToEvent = (req, res) => {
   const { user_id, event_id } = req.body; 
 
@@ -8,9 +10,31 @@ exports.registerToEvent = (req, res) => {
     return res.status(400).json({ error: "Données incomplètes" });
   }
 
-  db.query("INSERT INTO registrations (user_id, event_id, status) VALUES (?, ?, 'confirmed')", [user_id, event_id], (err) => {
+  // 🔍 خطوة الحماية: التأكد واش المستخدم ديجا مسجل ف هاد الحدث
+  const checkDuplicateQuery = "SELECT * FROM registrations WHERE user_id = ? AND event_id = ?";
+  
+  db.query(checkDuplicateQuery, [user_id, event_id], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Inscription réussie !" });
+    
+    // يلا لقى باللي ديجا كاين هاد التسجيل ف الـ Database
+    if (results.length > 0) {
+      return res.status(400).json({ error: "Vous êtes déjà inscrit à cet événement !" });
+    }
+
+    // يلا ملقاش التكرار، كيدوز التسجيل عادي كيمما درنا قبل
+    db.query("INSERT INTO registrations (user_id, event_id, status) VALUES (?, ?, 'confirmed')", [user_id, event_id], (insertErr) => {
+      if (insertErr) return res.status(500).json({ error: insertErr.message });
+      
+      // تنقيص مقعد واحد من الحدث
+      db.query("UPDATE events SET available_seats = available_seats - 1 WHERE id = ?", [event_id], (updateErr) => {
+        if (updateErr) {
+          console.error("Erreur lors de la mise à jour des places:", updateErr);
+          return res.status(500).json({ error: "Inscription réussie, mais échec du calcul des places." });
+        }
+        
+        res.json({ message: "Inscription réussie !" });
+      });
+    });
   });
 };
 
