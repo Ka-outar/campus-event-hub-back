@@ -1,7 +1,5 @@
 const db = require('../db'); 
 
-// 1. تسجيل الطالب في حدث
-// 1. تسجيل الطالب في حدث (مع تنقيص مقعد واحد)
 // 1. تسجيل الطالب في حدث (منع التكرار + تنقيص مقعد)
 exports.registerToEvent = (req, res) => {
   const { user_id, event_id } = req.body; 
@@ -38,13 +36,11 @@ exports.registerToEvent = (req, res) => {
   });
 };
 
-// 2. جلب تسجيلات الطالب 
-// جلب تسجيلات الطالب بـ ID ديالو
-// جلب تسجيلات الطالب بـ ID ديالو - النسخة المصححة والمضمونة
-// جلب تسجيلات الطالب بـ ID ديالو - النسخة المحدثة بالـ JOIN
+// 2. جلب تسجيلات الطالب بـ ID ديالو - النسخة المحدثة والمضمونة للطرفين
 exports.getUserRegistrations = (req, res) => {
   const { userId } = req.params;
 
+  // 💡 هنا حافظنا على كاع الاحتمالات باش الفرونت ميتلفش + الربط الجديد د الفئات د سناء
   const query = `
     SELECT 
       r.id AS registration_id, 
@@ -57,14 +53,14 @@ exports.getUserRegistrations = (req, res) => {
       r.registered_at,
       e.id AS id, 
       e.title, 
-      c.nom AS category, -- 🔥 كنجيبو اسم الفئة من الجدول الجديد نيت
+      c.nom AS category, -- 🔥 كنجيبو اسم الفئة من الجدول الجديد نيت د سناء
       e.date_event, 
       e.time_event, 
       e.location, 
       e.image_url
     FROM registrations r
     JOIN events e ON r.event_id = e.id
-    LEFT JOIN categories c ON e.categorie_id = c.id -- 🔥 إلصاق جدول الفئات هنا
+    LEFT JOIN categories c ON e.categorie_id = c.id -- 🔥 إلصاق جدول الفئات هنا لي ف الـ main
     WHERE r.user_id = ?
   `;
 
